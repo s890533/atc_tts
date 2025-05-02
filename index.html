@@ -158,7 +158,15 @@
       const languageSelect = document.getElementById('language');
       languageSelect.addEventListener('change', () => {
         const selected = languageSelect.value;
-        const max = selected.startsWith('Microsoft') ? 10 : 2;
+        const allowedMicrosoftVoices = [
+          'Microsoft David',
+          'Microsoft Mark',
+          'Microsoft Zira',
+          'Microsoft Hanhan',
+          'Microsoft Yating',
+          'Microsoft Zhiwei'
+        ];
+        const max = allowedMicrosoftVoices.some(name => selected.startsWith(name)) ? 10 : 2;
         rateInput.max = max;
         if (parseFloat(rateInput.value) > max) {
           rateInput.value = max;
@@ -183,7 +191,15 @@
         // 初始化 rate 上限依據初始語音
         setTimeout(() => {
           const selected = languageSelect.value;
-          const max = selected.startsWith('Google') ? 2 : 10;
+          const allowedMicrosoftVoices = [
+            'Microsoft David',
+            'Microsoft Mark',
+            'Microsoft Zira',
+            'Microsoft Hanhan',
+            'Microsoft Yating',
+            'Microsoft Zhiwei'
+          ];
+          const max = allowedMicrosoftVoices.some(name => selected.startsWith(name)) ? 10 : 2;
           rateInput.max = max;
           if (parseFloat(rateInput.value) > max) {
             rateInput.value = max;
