@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8" />
-  <title>ATC/ATIS TTS</title>
+  <title>ATC TTS</title>
   <style>
     body {
       background-color: #1E1E2F;
@@ -10,9 +10,14 @@
       color: #FFFFFF;
       margin: 0;
       padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: start;
+      min-height: 100vh;
     }
 
     .container {
+      width: 100%;
       max-width: 600px;
       margin: 50px auto;
       padding: 20px;
@@ -45,12 +50,11 @@
     }
 
     input[type="range"] {
-      width: calc(100% - 100px);
+      flex: 1;
     }
 
     .value-label {
       text-align: right;
-      margin-bottom: 10px;
       font-size: 0.9em;
     }
 
@@ -58,15 +62,17 @@
       display: flex;
       align-items: center;
       gap: 10px;
+      margin-bottom: 10px;
     }
 
     .reset-button {
       background-color: #555;
       color: white;
       border: none;
-      padding: 6px 12px;
+      padding: 6px 20px;
       border-radius: 5px;
       cursor: pointer;
+      white-space: nowrap;
     }
 
     .reset-button:hover {
@@ -104,8 +110,8 @@
 </head>
 <body>
   <div class="container">
-    <h1>ATC/ATIS TTS</h1>
-    <textarea id="richbox" placeholder="請輸入 ATC 指令..."></textarea>
+    <h1>ATC TTS</h1>
+    <textarea id="richbox" style="box-sizing: border-box;"></textarea>
 
     <label for="language">Language:</label>
     <select id="language"></select>
@@ -118,7 +124,7 @@
       <button class="reset-button" onclick="adjustRate(-0.1)">-0.1</button>
       <input type="range" id="rate" min="0.5" max="10" step="0.1" value="1" />
       <button class="reset-button" onclick="adjustRate(0.1)">+0.1</button>
-      <button class="reset-button" onclick="resetRate()">重設</button>
+      <button class="reset-button" style="min-width: 60px;" onclick="resetRate()">重設</button>
     </div>
 
     <div class="buttons">
@@ -173,19 +179,20 @@
             languageSelect.selectedIndex = index;
           }
         });
+
+        // 初始化 rate 上限依據初始語音
+        setTimeout(() => {
+          const selected = languageSelect.value;
+          const max = selected.startsWith('Google') ? 2 : 10;
+          rateInput.max = max;
+          if (parseFloat(rateInput.value) > max) {
+            rateInput.value = max;
+            document.getElementById('rateValue').textContent = max;
+          }
+        }, 100);
       };
 
       populateVoices();
-      // 初始化 rate 上限依據初始語音
-      setTimeout(() => {
-        const selected = languageSelect.value;
-        const max = selected.startsWith('Google') ? 2 : 10;
-        rateInput.max = max;
-        if (parseFloat(rateInput.value) > max) {
-          rateInput.value = max;
-          document.getElementById('rateValue').textContent = max;
-        }
-      }, 100);
       if (synth.onvoiceschanged !== undefined) {
         synth.onvoiceschanged = populateVoices;
       }
