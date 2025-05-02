@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <title>ATC/ATIS TTS</title>
+  <style>
+    body {
+      background-color: #1E1E2F;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #FFFFFF;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 50px auto;
+      padding: 20px;
+      background-color: #2A2A3D;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+    }
+
+    h1 {
+      text-align: center;
+      color: #BFA46F;
+    }
+
+    textarea {
+      width: 100%;
+      height: 150px;
+      padding: 10px;
+      margin-bottom: 15px;
+      border: 1px solid #666;
+      border-radius: 5px;
+      resize: vertical;
+      background-color: #3B3B4D;
+      color: #FFFFFF;
+    }
+
+    label {
+      display: block;
+      margin-top: 10px;
+      margin-bottom: 5px;
+    }
+
+    input[type="range"] {
+      width: calc(100% - 100px);
+    }
+
+    .value-label {
+      text-align: right;
+      margin-bottom: 10px;
+      font-size: 0.9em;
+    }
+
+    .range-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .reset-button {
+      background-color: #555;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .reset-button:hover {
+      background-color: #888;
+    }
+
+    select {
+      width: 100%;
+      padding: 5px;
+      background-color: #3B3B4D;
+      color: #FFFFFF;
+      border: 1px solid #666;
+      border-radius: 5px;
+    }
+
+    .buttons {
+      margin-top: 20px;
+      text-align: center;
+    }
+
+    button {
+      background-color: #BFA46F;
+      color: #1E1E2F;
+      border: none;
+      padding: 10px 20px;
+      margin: 0 10px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #FFD700;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>ATC/ATIS TTS</h1>
+    <textarea id="richbox" placeholder="請輸入 ATC 指令..."></textarea>
+
+    <label for="language">Language:</label>
+    <select id="language"></select>
+
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+      <label for="rate" style="margin: 0;">Rate:</label>
+      <div class="value-label" style="margin: 0;">目前值：<span id="rateValue">1</span></div>
+    </div>
+    <div class="range-group">
+      <button class="reset-button" onclick="adjustRate(-0.1)">-0.1</button>
+      <input type="range" id="rate" min="0.5" max="10" step="0.1" value="1" />
+      <button class="reset-button" onclick="adjustRate(0.1)">+0.1</button>
+      <button class="reset-button" onclick="resetRate()">重設</button>
+    </div>
+
+    <div class="buttons">
+      <button id="play">播放</button>
+      <button id="clear">清空</button>
+      <a id="downloadLink" style="display:none; margin-left: 10px; color: #FFD700;" download="tts-output.wav">下載音檔</a>
+    </div>
+  </div>
+
+  <script>
+    let currentUtterance = null;
+    let playing = false;
+
+    function resetRate() {
+      const rate = document.getElementById('rate');
+      rate.value = 1;
+      document.getElementById('rateValue').textContent = '1';
+    }
+
+    function adjustRate(delta) {
+      const rate = document.getElementById('rate');
+      let newVal = parseFloat(rate.value) + delta;
+      const max = parseFloat(rate.max);
+      newVal = Math.min(max, Math.max(0.5, newVal));
+      rate.value = newVal.toFixed(1);
+      document.getElementById('rateValue').textContent = rate.value;
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const rateInput = document.getElementById('rate');
+      const languageSelect = document.getElementById('language');
+      languageSelect.addEventListener('change', () => {
+        const selected = languageSelect.value;
+        const max = selected.startsWith('Google') ? 2 : 10;
+        rateInput.max = max;
+        if (parseFloat(rateInput.value) > max) {
+          rateInput.value = max;
+          document.getElementById('rateValue').textContent = max;
+        }
+      });
+
+      const synth = window.speechSynthesis;
+      const populateVoices = () => {
+        const voices = synth.getVoices();
+        languageSelect.innerHTML = '';
+        voices.forEach((voice, index) => {
+          const option = document.createElement('option');
+          option.value = voice.name;
+          option.textContent = `${voice.name} (${voice.lang})`;
+          languageSelect.appendChild(option);
+          if (index === 0 || voice.lang.startsWith('en-US')) {
+            languageSelect.selectedIndex = index;
+          }
+        });
+      };
+
+      populateVoices();
+      // 初始化 rate 上限依據初始語音
+      setTimeout(() => {
+        const selected = languageSelect.value;
+        const max = selected.startsWith('Google') ? 2 : 10;
+        rateInput.max = max;
+        if (parseFloat(rateInput.value) > max) {
+          rateInput.value = max;
+          document.getElementById('rateValue').textContent = max;
+        }
+      }, 100);
+      if (synth.onvoiceschanged !== undefined) {
+        synth.onvoiceschanged = populateVoices;
+      }
+
+      const rate = document.getElementById('rate');
+      rate.addEventListener('input', () => document.getElementById('rateValue').textContent = rate.value);
+    });
+
+    document.getElementById('play').addEventListener('click', () => {
+      const playButton = document.getElementById('play');
+      if (playing) {
+        window.speechSynthesis.cancel();
+        playing = false;
+        playButton.textContent = '播放';
+        return;
+      }
+
+      const text = document.getElementById('richbox').value;
+      const voiceName = document.getElementById('language').value;
+      const rate = parseFloat(document.getElementById('rate').value);
+
+      if (!text) {
+        alert('請輸入 ATC 指令');
+        return;
+      }
+
+      const utterance = new SpeechSynthesisUtterance(text);
+      const selectedVoice = speechSynthesis.getVoices().find(v => v.name === voiceName);
+      if (selectedVoice) utterance.voice = selectedVoice;
+      utterance.pitch = 1;
+      utterance.rate = rate;
+      currentUtterance = utterance;
+
+      utterance.onstart = () => {
+        playing = true;
+        playButton.textContent = '停止';
+      };
+
+      utterance.onend = () => {
+        playing = false;
+        playButton.textContent = '播放';
+      };
+
+      window.speechSynthesis.cancel();
+      window.speechSynthesis.speak(utterance);
+    });
+
+    document.getElementById('clear').addEventListener('click', () => {
+      document.getElementById('richbox').value = '';
+    });
+  </script>
+</body>
+</html>
