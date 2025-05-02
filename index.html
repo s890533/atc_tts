@@ -122,10 +122,15 @@
     </div>
     <div class="range-group">
       <button class="reset-button" onclick="adjustRate(-0.1)">-0.1</button>
-      <input type="range" id="rate" min="0.5" max="10" step="0.1" value="1" />
+      <input type="range" id="rate" min="0.5" max="10" step="0.1" value="1" style="width: 100%;">
       <button class="reset-button" onclick="adjustRate(0.1)">+0.1</button>
       <button class="reset-button" style="min-width: 60px;" onclick="resetRate()">重設</button>
     </div>
+
+    <label style="display: flex; align-items: center; gap: 10px; margin-top: 10px;">
+      <input type="checkbox" id="enableHighSpeed" checked>
+      啟用超高速 (僅支援部分語音)
+    </label>
 
     <div class="buttons">
       <button id="play">播放</button>
@@ -158,6 +163,8 @@
       const languageSelect = document.getElementById('language');
       languageSelect.addEventListener('change', () => {
         const selected = languageSelect.value;
+        const enableHighSpeedCheckbox = document.getElementById('enableHighSpeed');
+
         const allowedMicrosoftVoices = [
           'Microsoft David',
           'Microsoft Mark',
@@ -166,7 +173,12 @@
           'Microsoft Yating',
           'Microsoft Zhiwei'
         ];
-        const max = allowedMicrosoftVoices.some(name => selected.startsWith(name)) ? 10 : 2;
+
+        // 若為指定語音，自動勾選
+        const isAllowed = allowedMicrosoftVoices.some(name => selected.startsWith(name));
+        enableHighSpeedCheckbox.checked = isAllowed;
+
+        const max = isAllowed || enableHighSpeedCheckbox.checked ? 10 : 2;
         rateInput.max = max;
         if (parseFloat(rateInput.value) > max) {
           rateInput.value = max;
@@ -191,6 +203,8 @@
         // 初始化 rate 上限依據初始語音
         setTimeout(() => {
           const selected = languageSelect.value;
+          const enableHighSpeedCheckbox = document.getElementById('enableHighSpeed');
+
           const allowedMicrosoftVoices = [
             'Microsoft David',
             'Microsoft Mark',
@@ -199,7 +213,11 @@
             'Microsoft Yating',
             'Microsoft Zhiwei'
           ];
-          const max = allowedMicrosoftVoices.some(name => selected.startsWith(name)) ? 10 : 2;
+
+          const isAllowed = allowedMicrosoftVoices.some(name => selected.startsWith(name));
+          enableHighSpeedCheckbox.checked = isAllowed;
+
+          const max = isAllowed || enableHighSpeedCheckbox.checked ? 10 : 2;
           rateInput.max = max;
           if (parseFloat(rateInput.value) > max) {
             rateInput.value = max;
