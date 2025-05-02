@@ -158,7 +158,7 @@
       const languageSelect = document.getElementById('language');
       languageSelect.addEventListener('change', () => {
         const selected = languageSelect.value;
-        const max = selected.startsWith('Google') ? 2 : 10;
+        const max = selected.startsWith('Microsoft') ? 10 : 2;
         rateInput.max = max;
         if (parseFloat(rateInput.value) > max) {
           rateInput.value = max;
