@@ -195,9 +195,9 @@
           option.value = voice.name;
           option.textContent = `${voice.name} (${voice.lang})`;
           languageSelect.appendChild(option);
-          if (index === 0 || voice.lang.startsWith('en-US')) {
-            languageSelect.selectedIndex = index;
-          }
+          // if (index === 0 || voice.lang.startsWith('en-US')) {
+          //   languageSelect.selectedIndex = index;
+          // }
         });
 
         // 初始化 rate 上限依據初始語音
