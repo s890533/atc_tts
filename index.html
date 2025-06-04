@@ -158,6 +158,15 @@
       document.getElementById('rateValue').textContent = rate.value;
     }
 
+    function convertNumbersToWords(input) {
+      const numberWords = [
+        "zero", "one", "two", "three", "four",
+        "five", "six", "seven", "eight", "nine"
+      ];
+
+      return input.replace(/\d/g, digit => numberWords[parseInt(digit)]);
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
       const rateInput = document.getElementById('rate');
       const languageSelect = document.getElementById('language');
@@ -244,7 +253,7 @@
         return;
       }
 
-      const text = document.getElementById('richbox').value;
+      const text = convertNumbersToWords(document.getElementById('richbox').value);
       const voiceName = document.getElementById('language').value;
       const rate = parseFloat(document.getElementById('rate').value);
 
