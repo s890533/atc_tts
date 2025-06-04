@@ -253,7 +253,9 @@
         return;
       }
 
-      const text = convertNumbersToWords(document.getElementById('richbox').value);
+      document.getElementById('richbox').value = convertNumbersToWords(document.getElementById('richbox').value);
+
+      const text = document.getElementById('richbox').value;
       const voiceName = document.getElementById('language').value;
       const rate = parseFloat(document.getElementById('rate').value);
 
